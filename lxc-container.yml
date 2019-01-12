@@ -1,0 +1,88 @@
+- hosts: dell_laptop
+  name: Lxc Container Create
+  become: true
+  vars:
+  - interface: lxcbr0
+
+  tasks:
+  - name: apt lxc packages are installed on host
+    apt: name={{ item }}
+    with_items:
+    - lxc
+    - lxc-dev
+    - python-pip
+
+  - copy:
+      dest: /etc/default/lxc-net
+      content: |
+        USE_LXC_BRIDGE="true"
+
+  - copy:
+      dest: /etc/lxc/default.conf
+      content: |
+        lxc.network.type = veth
+        lxc.network.link = {{ interface }}
+        lxc.network.flags = up
+        lxc.network.hwaddr = 00:16:3e:xx:xx:xx
+
+  - service:
+      name: lxc-net
+      state: started
+
+  - name: pip lxc packages are installed on host
+    pip:
+      name: "{{ item }}"
+    with_items:
+    - lxc-python2
+    run_once: true
+
+- hosts: dell_laptop
+  become: true
+  vars:
+  - interface: lxcbr0
+  tasks:
+  - name: Load in local SSH key path
+    set_fact:
+      my_ssh_key: "{{ lookup('env','HOME') }}/.ssh/id_rsa.pub"
+
+  - name: interface device exists
+    command: ip addr show {{ interface }}
+    changed_when: false
+    run_once: true
+
+  - name: containers exist and have local SSH key
+    delegate_to: localhost
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      container_log: true
+      template: debian
+      state: started
+      template_options: --release stretch
+      container_config:
+        - "lxc.network.type = veth"
+        - "lxc.network.flags = up"
+        - "lxc.network.link = {{ interface }}"
+        - "lxc.network.ipv4 = {{ ansible_host }}/24"
+        - "lxc.network.ipv4.gateway = auto"
+      container_command: |
+        if [ ! -d ~/.ssh ]; then
+          mkdir ~/.ssh
+          echo "{{ lookup('file', my_ssh_key) }}" | tee -a ~/.ssh/authorized_keys
+          sed -i 's/dhcp/manual/' /etc/network/interfaces && systemctl restart network
+        fi
+- hosts: dell_laptop
+  become: false
+  serial: 1
+  tasks:
+  - wait_for: host={{ ansible_host }} port=22
+
+  - name: container key is up-to-date locally
+    shell: ssh-keygen -R {{ ansible_host }}; (ssh-keyscan {{ ansible_host }} >> ~/.ssh/known_hosts)
+
+- hosts: dell_laptop
+  gather_facts: no
+  vars:
+  - ansible_user: root
+  tasks:
+  - name: install python on target machines
+    raw: which python || (apt-get -y update && apt-get install -y python)
