@@ -1,0 +1,34 @@
+---
+- hosts: virtual
+  vars:
+    username: invoron
+  become: true
+  tasks:
+    - name: make direcotry
+      file:
+        path: "/home/{{ username }}/.ssh"
+        state: directory
+      tags:
+        - ssh
+
+    - name: copy authorized_keys
+      copy:
+        src: authorized_keys
+        dest: "/home/{{ username }}/.ssh/authorized_keys"
+        state: directory
+      tags:
+        - ssh
+
+    - name: copy sshd_config
+      copy:
+        src: sshd_config
+        dest: "/etc/ssh/"
+      tags:
+        - ssh
+
+    - name: restart nginx
+      service:
+        name=ssh
+        state=restarted
+      tags:
+        - nginx
