@@ -1,4 +1,4 @@
-- hosts: dell_laptop
+- hosts: localhost
   name: Lxc Container Create
   become: true
   vars:
@@ -20,10 +20,10 @@
   - copy:
       dest: /etc/lxc/default.conf
       content: |
-        lxc.network.type = veth
-        lxc.network.link = {{ interface }}
-        lxc.network.flags = up
-        lxc.network.hwaddr = 00:16:3e:xx:xx:xx
+        lxc.net.0.type = veth
+        lxc.net.0.link = {{ interface }}
+        lxc.net.0.flags = up
+        lxc.net.0.hwaddr = 00:16:3e:xx:xx:xx
 
   - service:
       name: lxc-net
@@ -36,7 +36,8 @@
     - lxc-python2
     run_once: true
 
-- hosts: dell_laptop
+- hosts: all 
+  connection: local
   become: true
   vars:
   - interface: lxcbr0
@@ -51,7 +52,6 @@
     run_once: true
 
   - name: containers exist and have local SSH key
-    delegate_to: localhost
     lxc_container:
       name: "{{ inventory_hostname }}"
       container_log: true
@@ -59,18 +59,18 @@
       state: started
       template_options: --release stretch
       container_config:
-        - "lxc.network.type = veth"
-        - "lxc.network.flags = up"
-        - "lxc.network.link = {{ interface }}"
-        - "lxc.network.ipv4 = {{ ansible_host }}/24"
-        - "lxc.network.ipv4.gateway = auto"
+        - "lxc.net.0.type = veth"
+        - "lxc.net.0.flags = up"
+        - "lxc.net.0.link = {{ interface }}"
+        - "lxc.net.0.ipv4 = {{ ansible_host }}/24"
+        - "lxc.net.0.ipv4.gateway = auto"
       container_command: |
         if [ ! -d ~/.ssh ]; then
           mkdir ~/.ssh
           echo "{{ lookup('file', my_ssh_key) }}" | tee -a ~/.ssh/authorized_keys
           sed -i 's/dhcp/manual/' /etc/network/interfaces && systemctl restart network
         fi
-- hosts: dell_laptop
+- hosts: all 
   become: false
   serial: 1
   tasks:
@@ -79,7 +79,7 @@
   - name: container key is up-to-date locally
     shell: ssh-keygen -R {{ ansible_host }}; (ssh-keyscan {{ ansible_host }} >> ~/.ssh/known_hosts)
 
-- hosts: dell_laptop
+- hosts: all
   gather_facts: no
   vars:
   - ansible_user: root
