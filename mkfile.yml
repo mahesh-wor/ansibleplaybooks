@@ -1,5 +1,6 @@
-  tasks:
-  - name: Ansible create File
-    file:
-      path: "/home/invoron/Desktop/"
-      state: touch
+
+ tasks:
+ - name: Ansible create File
+   file:
+     path: "/home/invoron/Desktop/"
+     state: touch
