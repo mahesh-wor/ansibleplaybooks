@@ -1,0 +1,7 @@
+- hosts: all
+  tasks:
+  - name: Ansible create file
+    file:
+      path: "/home/$USER/Desktop/file_created.txt"
+      state: touch
+
