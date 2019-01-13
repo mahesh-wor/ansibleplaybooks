@@ -1,6 +1,7 @@
+- hosts: all
+  tasks:
+  - name: Ansible create file
+    file:
+      path: "/home/$USER/Desktop/Foobar.txt"
+      state: touch
 
- tasks:
- - name: Ansible create File
-   file:
-     path: "/home/invoron/Desktop/"
-     state: touch
