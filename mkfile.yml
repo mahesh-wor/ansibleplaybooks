@@ -1,0 +1,6 @@
+- hosts: 
+  tasks:
+  - name: Ansible create File
+    file:
+      path: "/home/invoron/Desktop/"
+      state: touch

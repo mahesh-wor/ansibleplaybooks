@@ -26,7 +26,7 @@
       tags:
         - ssh
 
-    - name: restart nginx
+    - name: restart SSH Service
       service:
         name=ssh
         state=restarted
