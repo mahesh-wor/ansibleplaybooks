@@ -2,6 +2,6 @@
   tasks:
   - name: Ansible create file
     file:
-      path: "/home/$USER/Desktop/Foobar.txt"
+      path: "/home/$USER/Desktop/file_$(date).txt"
       state: touch
 
