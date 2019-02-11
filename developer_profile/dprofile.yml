@@ -14,7 +14,7 @@
         - odoo11
         - odoo12
 
-    - name: install docker
+    - name: Install Docker
       apt:
         name: docker.io
         state: present
@@ -26,10 +26,9 @@
         - odoo11
         - odoo12
 
-    - name: install python-docker
+    - name: Install python-docker module
       apt:
         name: python-docker
-        update_cache: yes
       when: ansible_os_family == 'Debian'
       tags:
         - docker
@@ -37,7 +36,7 @@
         - odoo11
         - odoo12
 
-    - name: Postgre Environment
+    - name: Postgre Environment For Docker
       copy:
         src: postgres_env.tpl
         dest: "/tmp/"
@@ -135,6 +134,5 @@
       apt:
         name: geany
         state: present
-        update_cache: yes
       tags:
         - geany
