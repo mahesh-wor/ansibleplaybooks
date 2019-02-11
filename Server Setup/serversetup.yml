@@ -4,11 +4,17 @@
     username: $USER
   become: true
   tasks:
+    - name: Cloning LXDUI.
+      git:
+        repo: https://github.com/AdaptiveScale/lxdui.git
+        version: master
+        dest: /opt/
+        accept_hostkey: yes
 
     - name: update and upgrade system
       apt:
-        upgrade: yes
         update_cache: yes
+        upgrade: yes
       tags:
         - apt
     - name: install nginx
@@ -35,7 +41,6 @@
       apt:
         name: ['python-pip', 'python3-pip']
         state: present
-
       tags:
         - pip
 
@@ -50,5 +55,9 @@
       apt:
         name: nginx
         state: present
-      tags:
-        - nginx
+      ta Cloning LXDUI.gate repository into /opt.
+          git:
+        repgit
+        version: master
+        dest: /opt/private-repo
+    accept_hostkey: yes
