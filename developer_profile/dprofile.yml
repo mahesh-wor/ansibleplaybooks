@@ -109,7 +109,7 @@
         env: {'PGADMIN_DEFAULT_EMAIL':'user@gmail.com','PGADMIN_DEFAULT_PASSWORD':'password'}
         privileged: true
         ports:
-          - 8090:8069
+          - 8090:80
       tags:
         - pgadmin
 
