@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  vars:
+    username: $USER
+  become: true
+  tasks:
+    - name: Update and Upgrade system
+      apt:
+        upgrade: yes
+        update_cache: yes
+      tags:
+        - apt
+    - name: 

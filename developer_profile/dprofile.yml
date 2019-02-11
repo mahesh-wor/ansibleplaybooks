@@ -2,9 +2,6 @@
 - hosts: localhost
   vars:
     username: $USER
-    pip_install_packages:
-      -name: docker
-
   become: true
   tasks:
     - name: Update and Upgrade system
@@ -54,6 +51,7 @@
       docker_container:
         name: db10
         image: postgres:10
+        state: started
         privileged: true
         env_file: /tmp/postgres_env.tpl
       tags:
@@ -68,6 +66,7 @@
         name: odoo10
         image: odoo:10
         privileged: true
+        state: started
         links:
           - db10:db
         ports:
@@ -80,6 +79,7 @@
         # env_file: postgres_env.tpl
         name: odoo11
         image: odoo:11
+        state: started
         privileged: true
         links:
           - db10:db
@@ -92,6 +92,7 @@
       docker_container:
         # env_file: postgres_env.tpl
         name: odoo12
+        state: started
         image: odoo:12
         privileged: true
         links:
@@ -105,6 +106,7 @@
       docker_container:
         # env_file: postgres_env.tpl
         name: pgadmin
+        state: started
         image: dpage/pgadmin4
         env: {'PGADMIN_DEFAULT_EMAIL':'user@gmail.com','PGADMIN_DEFAULT_PASSWORD':'password'}
         privileged: true
@@ -118,6 +120,7 @@
         # env_file: postgres_env.tpl
         name: pgadmin
         image: netdata/netdata
+        state: started
         privileged: true
         ports:
           - 19999:19999
