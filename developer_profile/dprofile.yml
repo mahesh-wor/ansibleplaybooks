@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   vars:
-    username: {{ username }}
+    username: $USER
     pip_install_packages:
       -name: docker
 
