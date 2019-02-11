@@ -4,10 +4,55 @@
     username: $USER
   become: true
   tasks:
-    - name: Update and Upgrade system
+
+
+
+    - name: update and upgrade system
       apt:
         upgrade: yes
         update_cache: yes
       tags:
         - apt
-    - name: 
+    - name: install nginx
+      apt:
+        name: nginx
+      tags:
+        - nginx
+
+    - name: install openssh-server
+      apt:
+        name: openssh-server
+        state: present
+      tags:
+        - openssh
+
+    - name: install openvpn
+      apt:
+        name: openvpn
+        state: present
+      tags:
+        - openvpn
+
+    - name: install python-pip
+      apt:
+        name: {{ items }}
+        state: present
+      with_items:
+        - python-pip
+        - python3-pip
+      tags:
+        - pip
+
+    - name: install cockpit
+      apt:
+        name: cockpit
+        state: present
+      tags:
+        - cockpit
+
+    - name: install nginx
+      apt:
+        name: nginx
+        state: present
+      tags:
+        - nginx

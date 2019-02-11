@@ -117,7 +117,7 @@
     - name: Netdata Container
       docker_container:
         # env_file: postgres_env.tpl
-        name: pgadmin
+        name: netdata
         image: netdata/netdata
         state: started
         privileged: true
