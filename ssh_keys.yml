@@ -5,7 +5,7 @@
   become: true
   tasks:
     - name: make direcotry
-file:
+      file:
         path: "/home/{{ username }}/.ssh"
         state: directory
       tags:

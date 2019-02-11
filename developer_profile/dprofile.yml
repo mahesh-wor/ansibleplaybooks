@@ -1,0 +1,141 @@
+---
+- hosts: localhost
+  vars:
+    username: {{ username }}
+    pip_install_packages:
+      -name: docker
+
+  become: true
+  tasks:
+    - name: Update and Upgrade system
+      apt:
+        upgrade: yes
+        update_cache: yes
+      tags:
+        - apt
+        - odoo10
+        - odoo11
+        - odoo12
+
+    - name: install docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+      tags:
+        - docker
+        - odoo10
+        - odoo11
+        - odoo12
+
+    - name: install python-docker
+      apt:
+        name: python-docker
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+      tags:
+        - docker
+        - odoo10
+        - odoo11
+        - odoo12
+
+    - name: Postgre Environment
+      copy:
+        src: postgres_env.tpl
+        dest: "/tmp/"
+      tags:
+        - postgres
+        - odoo10
+        - odoo11
+        - odoo12
+
+    - name: Create Postgres:10 Container
+      docker_container:
+        name: db10
+        image: postgres:10
+        privileged: true
+        env_file: /tmp/postgres_env.tpl
+      tags:
+        - postgres
+        - odoo10
+        - odoo11
+        - odoo12
+
+    - name: Create Odoo10 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: odoo10
+        image: odoo:10
+        privileged: true
+        links:
+          - db10:db
+        ports:
+          - 8080:8069
+      tags:
+        - odoo10
+
+    - name: Create Odoo11 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: odoo11
+        image: odoo:11
+        privileged: true
+        links:
+          - db10:db
+        ports:
+          - 8081:8069
+      tags:
+        - odoo11
+
+    - name: Create Odoo12 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: odoo12
+        image: odoo:12
+        privileged: true
+        links:
+          - db12:db
+        ports:
+          - 8082:8069
+      tags:
+        - odoo12
+
+    - name: Create Pgadmin4 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: pgadmin
+        image: dpage/pgadmin4
+        env: {'PGADMIN_DEFAULT_EMAIL':'user@gmail.com','PGADMIN_DEFAULT_PASSWORD':'password'}
+        privileged: true
+        ports:
+          - 8090:8069
+      tags:
+        - pgadmin
+
+    - name: Netdata Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: pgadmin
+        image: netdata/netdata
+        privileged: true
+        ports:
+          - 19999:19999
+        cap_add:
+          - SYS_PTRACE
+        security_opt:
+          - apparmor: unconfined
+        volumes:
+          - /proc:/host/proc:ro
+          - /sys:/host/sys:ro
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+      tags:
+        - netdata
+
+    - name: Install Geany IDE
+      apt:
+        name: geany
+        state: present
+        update_cache: yes
+      tags:
+        - geany
