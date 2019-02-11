@@ -5,8 +5,6 @@
   become: true
   tasks:
 
-
-
     - name: update and upgrade system
       apt:
         upgrade: yes
@@ -35,11 +33,9 @@
 
     - name: install python-pip
       apt:
-        name: "{{ item }}"
+        name: ['python-pip', 'python3-pip']
         state: present
-      with_items:
-        - python-pip
-        - python3-pip
+
       tags:
         - pip
 
