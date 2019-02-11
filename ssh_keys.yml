@@ -1,11 +1,11 @@
 ---
 - hosts: all
   vars:
-    username: invoron
+    username: ubuntu
   become: true
   tasks:
     - name: make direcotry
-      file:
+file:
         path: "/home/{{ username }}/.ssh"
         state: directory
       tags:
@@ -15,7 +15,6 @@
       copy:
         src: authorized_keys
         dest: "/home/{{ username }}/.ssh/authorized_keys"
-        state: directory
       tags:
         - ssh
 
