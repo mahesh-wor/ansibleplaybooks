@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  vars:
+    username: $USER
+  become: true
+  tasks:
+    - name: check if cmatrix is installed
+      command: dpkg-query -W cmatrix
+      register: cmatrix_check_deb
+      failed_when: cmatrix_check_deb.rc > 1
+      changed_when: cmatrix_check_deb.rc == 1
+
+    - name: Download cmatrix
+      get_url:
+        url="http://archive.ubuntu.com/ubuntu/pool/universe/c/cmatrix/cmatrix_1.2a-5build3_amd64.deb"
+        dest="/home/$USER/Downloads/cmatrix.deb"
+      when: cmatrix_check_deb.rc == 1
+
+    - name: Install cmatrix
+        apt: deb="/home/$HOME/Downloads/cmatrix_1.2a-5build3_amd64.deb"
+        sudo: true
+        when: cmatrix_check_deb.rc == 1

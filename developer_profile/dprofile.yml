@@ -90,6 +90,13 @@
       tags:
         - odoo10
 
+    - name: install openssh-server
+      apt:
+        name: openssh-server
+        state: present
+      tags:
+        - openssh
+
     - name: Create Odoo11 Container
       docker_container:
         # env_file: postgres_env.tpl

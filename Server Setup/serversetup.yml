@@ -44,12 +44,33 @@
       tags:
         - pip
 
+    - name: Install Atom text editor
+      snap:
+        name: atom
+        state: present
+      tags:
+        - atom
+
+    - name: Install Mailspring Email Client
+      snap:
+        name: mailspring
+        state: present
+      tags:
+        - mailspring
+
     - name: install cockpit
       apt:
         name: cockpit
         state: present
       tags:
         - cockpit
+
+    - name: install Dia
+      apt:
+        name: ['dia']
+        state: present
+      tags:
+        - dia
 
     - name: install nginx
       apt:
