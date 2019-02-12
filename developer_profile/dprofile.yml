@@ -8,60 +8,41 @@
       apt:
         upgrade: yes
         update_cache: yes
-      tags:
-        - apt
-        - odoo10
-        - odoo11
-        - odoo12
+      tags: ['apt','odoo10','odoo11','odoo12']
 
     - name: Install lxd and lxc-utils
       apt:
         name: ['lxd','lxc-utils','lxd-tools']
         state: present
       when: ansible_os_family == 'Debian'
-      tags:
-        - lxd
-        - lxc
+      tags: ['lxd','lxc']
 
     - name: Install Git
       apt:
         name: git
         state: present
       when: ansible_os_family == 'Debian'
-      tags:
-        - git
-
+      tags: ['git']
     - name: Install Docker
       apt:
         name: docker.io
         state: present
         update_cache: true
       when: ansible_os_family == 'Debian'
-      tags:
-        - docker
-        - odoo10
-        - odoo11
-        - odoo12
+      tags: ['docker','odoo10','odoo11','odoo12']
 
     - name: Install python-docker module
       apt:
         name: python-docker
       when: ansible_os_family == 'Debian'
-      tags:
-        - docker
-        - odoo10
-        - odoo11
-        - odoo12
+      tags: ['docker','odoo10','odoo11','odoo12']
+
 
     - name: Postgre Environment For Docker
       copy:
         src: postgres_env.tpl
         dest: "/tmp/"
-      tags:
-        - postgres
-        - odoo10
-        - odoo11
-        - odoo12
+      tags: ['postgres','odoo10','odoo11','odoo12']
 
     - name: Create Postgres:10 Container
       docker_container:
@@ -70,11 +51,8 @@
         state: started
         privileged: true
         env_file: /tmp/postgres_env.tpl
-      tags:
-        - postgres
-        - odoo10
-        - odoo11
-        - odoo12
+      tags: ['postgres','odoo10','odoo11','odoo12']
+
 
     - name: Create Odoo10 Container
       docker_container:
@@ -87,15 +65,13 @@
           - db10:db
         ports:
           - 8080:8069
-      tags:
-        - odoo10
+      tags: ['odoo10']
 
     - name: install openssh-server
       apt:
         name: openssh-server
         state: present
-      tags:
-        - openssh
+      tags: ['openssh']
 
     - name: Create Odoo11 Container
       docker_container:
@@ -108,8 +84,7 @@
           - db10:db
         ports:
           - 8081:8069
-      tags:
-        - odoo11
+      tags: ['odoo11']
 
     - name: Create Odoo12 Container
       docker_container:
@@ -122,8 +97,7 @@
           - db10:db
         ports:
           - 8082:8069
-      tags:
-        - odoo12
+      tags: ['odoo12']
 
     - name: Create Pgadmin4 Container
       docker_container:
@@ -135,8 +109,7 @@
         privileged: true
         ports:
           - 8090:80
-      tags:
-        - pgadmin
+      tags: ['pgadmin']
 
     - name: Netdata Container
       docker_container:
@@ -151,12 +124,24 @@
           - /proc:/host/proc:ro
           - /sys:/host/sys:ro
           - /var/run/docker.sock:/var/run/docker.sock:ro
-      tags:
-        - netdata
+      tags: ['netdata']
+
+    - name: Install atom-text
+      command: snap install atom --classic
+      tags: ['atom']
+
+    - name: Install brackets
+      command: snap install brackets --classic
+      tags: ['brackets']
 
     - name: Install Geany IDE
       apt:
         name: geany
         state: present
-      tags:
-        - geany
+      tags: ['geany']
+
+    - name: install Dia
+      apt:
+        name: ['dia']
+        state: present
+      tags: ['dia']
