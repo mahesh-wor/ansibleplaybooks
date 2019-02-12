@@ -62,10 +62,10 @@
         path: /home/$USER/odoo11-addons
         state: directory
       file:
-        path: /home/$USER/odoo11-addons
+        path: /home/$USER/odoo12-addons
         state: directory
 
-      tags: ['odoo','odoo10','odoo11','odoo12']
+      tags: ['uniq','odoo','odoo10','odoo11','odoo12']
 
     - name: Create Odoo10 Container
       docker_container:
@@ -79,7 +79,7 @@
         ports:
           - 8080:8069
         volumes:
-          - $HOME/:/host/proc:ro
+          - $HOME/odoo10-addons:/mnt/addons
       tags: ['odoo10']
 
     - name: install openssh-server
@@ -97,6 +97,8 @@
         privileged: true
         links:
           - db10:db
+        volumes:
+          - $HOME/odoo10-addons:/mnt/addons
         ports:
           - 8081:8069
       tags: ['odoo11']
@@ -112,6 +114,8 @@
           - db10:db
         ports:
           - 8082:8069
+        volumes:
+          - $HOME/odoo10-addons:/mnt/addons
       tags: ['odoo12']
 
     - name: Create Pgadmin4 Container
