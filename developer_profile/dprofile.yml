@@ -54,6 +54,18 @@
         env_file: /tmp/postgres_env.tpl
       tags: ['postgres','odoo10','odoo11','odoo12']
 
+    - name: Create Odoo Mount Volumes ($HOME/odooxxx)
+      file:
+        path: /home/$USER/odoo10-addons
+        state: directory
+      file:
+        path: /home/$USER/odoo11-addons
+        state: directory
+      file:
+        path: /home/$USER/odoo11-addons
+        state: directory
+
+      tags: ['odoo','odoo10','odoo11','odoo12']
 
     - name: Create Odoo10 Container
       docker_container:
@@ -66,6 +78,8 @@
           - db10:db
         ports:
           - 8080:8069
+        volumes:
+          - $HOME/:/host/proc:ro
       tags: ['odoo10']
 
     - name: install openssh-server
@@ -157,7 +171,7 @@
 
     - name: Create Jenkins HOME dir
       file:
-        path: /home/$HOME/jenkins_home
+        path: /home/$USER/jenkins_home
         state: directory
       tags: ['jenkins']
 
@@ -172,7 +186,7 @@
           - 8060:8080
           - 50000:50000
         volumes:
-          - /home/$HOME/jenkins_home:/var/jenkins_home
+          - /home/$USER/jenkins_home:/var/jenkins_home
       tags: ['jenkins']
 
     - name: Download ISP Config
