@@ -79,7 +79,7 @@
         ports:
           - 8080:8069
         volumes:
-          - $HOME/odoo10-addons:/mnt/addons
+          - $HOME/odoo10-addons:/mnt/extra-addons   ###add absolute path
       tags: ['odoo10']
 
     - name: install openssh-server
@@ -98,7 +98,7 @@
         links:
           - db10:db
         volumes:
-          - $HOME/odoo10-addons:/mnt/addons
+          - $HOME/odoo11-addons:/mnt/extra-addons ##add absolute path
         ports:
           - 8081:8069
       tags: ['odoo11']
@@ -115,7 +115,7 @@
         ports:
           - 8082:8069
         volumes:
-          - $HOME/odoo10-addons:/mnt/addons
+          - $HOME/odoo10-addons:/mnt/extra-addons   ###add absolute path
       tags: ['odoo12']
 
     - name: Create Pgadmin4 Container
@@ -190,7 +190,7 @@
           - 8060:8080
           - 50000:50000
         volumes:
-          - /home/$USER/jenkins_home:/var/jenkins_home
+          - jenkins_home:/var/jenkins_home
       tags: ['jenkins']
 
     - name: Download ISP Config

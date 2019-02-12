@@ -61,3 +61,10 @@
         version: master
         dest: /opt/private-repo
     accept_hostkey: yes
+
+    - name: install lxd
+      apt:
+        name: openssh-server
+        state: present
+      tags:
+        - openssh
