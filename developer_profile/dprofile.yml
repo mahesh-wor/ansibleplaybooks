@@ -128,17 +128,25 @@
 
     - name: Install atom-text
       command: snap install atom --classic
+      tags: ['atom','never']
+
+    - name: Install atom-text
+      command: snap install atom --classic
       tags: ['atom']
 
     - name: Install brackets
       command: snap install brackets --classic
-      tags: ['brackets']
+      tags: ['brackets','never']
+
+    - name: Install pycharm-community
+      command: snap install pycharm-community --classic
+      tags: ['pycharm','never']
 
     - name: Install Geany IDE
       apt:
         name: geany
         state: present
-      tags: ['geany']
+      tags: ['geany','never']
 
     - name: install Dia
       apt:

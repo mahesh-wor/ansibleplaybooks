@@ -44,14 +44,12 @@
       tags:
         - pip
 
-
     - name: install cockpit
       apt:
         name: cockpit
         state: present
       tags:
         - cockpit
-
 
     - name: install nginx
       apt:
