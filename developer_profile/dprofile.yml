@@ -15,7 +15,7 @@
         name: ['lxd','lxc-utils','lxd-tools']
         state: present
       when: ansible_os_family == 'Debian'
-      tags: ['lxd','lxc']
+      tags: ['lxd','lxc','never']
 
     - name: Install Git
       apt:
@@ -23,6 +23,7 @@
         state: present
       when: ansible_os_family == 'Debian'
       tags: ['git']
+
     - name: Install Docker
       apt:
         name: docker.io
@@ -153,3 +154,30 @@
         name: ['dia']
         state: present
       tags: ['dia']
+
+    - name: Create Jenkins HOME dir
+      file:
+        path: /home/$HOME/jenkins_home
+        state: directory
+      tags: ['jenkins']
+
+    - name: Jenkins Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: jenkins
+        image: jenkins/jenkins:lts
+        state: started
+        privileged: true
+        ports:
+          - 8060:8080
+          - 50000:50000
+        volumes:
+          - /home/$HOME/jenkins_home:/var/jenkins_home
+      tags: ['jenkins']
+
+    - name: Download ISP Config
+      get_url:
+        url: https://ispconfig.org/downloads/ISPConfig-3.1.13.tar.gz
+        dest: /tmp/ISPConfig-3.1.13.tar.gz
+        mode: 0440
+      tags: ['ispconfig','never']
