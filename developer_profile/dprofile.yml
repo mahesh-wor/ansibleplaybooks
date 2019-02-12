@@ -14,6 +14,23 @@
         - odoo11
         - odoo12
 
+    - name: Install lxd and lxc-utils
+      apt:
+        name: ['lxd','lxc-utils','lxd-tools']
+        state: present
+      when: ansible_os_family == 'Debian'
+      tags:
+        - lxd
+        - lxc
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+      when: ansible_os_family == 'Debian'
+      tags:
+        - git
+
     - name: Install Docker
       apt:
         name: docker.io
