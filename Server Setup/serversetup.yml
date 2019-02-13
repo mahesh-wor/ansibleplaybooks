@@ -1,6 +1,7 @@
 ---
 - hosts: localhost
   vars:
+    dockerstation: "https://github.com/DockStation/dockstation/releases/download/v1.4.1/dockstation_1.4.1_amd64.deb"
     username: "{{ ansible_user_id }}"
   become: true
   tasks:
@@ -53,6 +54,12 @@
         state: present
       tags: ['cockpit']
 
+    - name: install zfs-utils
+      apt:
+        name: ['zfsutils-linux', 'zfs-dkms' ,'zfsutils-linux']
+        state: present
+      tags: ['lxd','never']
+
     - name: Install lxd and lxc-utils
       apt:
         name: ['lxd','lxc-utils','lxd-tools']
@@ -67,3 +74,14 @@
         dest: /opt/
       accept_hostkey: yes
       tags: ['never','lxdui']
+
+    - name: Download dockerstation
+      get_url: url="{{ dockerstation }}"
+        dest="/home/{{ ansible_env.USER }}/Downloads/{{ dockerstation }}.deb"
+      tags: ['docker','dockerstation']
+
+    - name: Install dockerstation
+      apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ dockerstation }}.deb"
+        state=present
+        tags: ['docker','dockerstation']
+      sudo: true

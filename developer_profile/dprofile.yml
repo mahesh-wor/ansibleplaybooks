@@ -1,6 +1,8 @@
 ---
 - hosts: localhost
   vars:
+    dockerstation_link: "https://github.com/DockStation/dockstation/releases/download/v1.4.1/dockstation_1.4.1_amd64.deb"
+    docker_file: "dockerstation_file"
     username: "{{ ansible_user_id }}"
   become: true
   tasks:
@@ -52,10 +54,10 @@
       copy:
         src: hosts
         dest: "/tmp/"
-      tags: ['postgres','odoo10','odoo11','odoo12']
+      tags: ['postgres','odoo10','odcoo11','odoo12']
 
     - name: appending  /etc/hosts
-      command: echo /tmp/hosts >> /etc/hosts
+      command: sh -c 'cat /tmp/hosts >> /etc/hosts'
       tags: ['dns','odoo10','odoo11','odoo12','postgres']
 
 
@@ -115,7 +117,7 @@
           - /home/{{ ansible_user_id }}/odoo11-addons:/mnt/extra-addons ##add absolute path
         ports:
           - 8081:8069
-      tags: ['odoo11','uniq']
+      tags: ['odoo11']
 
     - name: Create Odoo12 Container
       docker_container:
@@ -233,3 +235,15 @@
         dest: /tmp/ISPConfig-3.1.13.tar.gz
         mode: 0440
       tags: ['ispconfig','never']
+
+    - name: Download dockerstation
+      get_url: url="{{ dockerstation_link }}"
+        dest="/home/{{ ansible_env.USER }}/Downloads/{{ docker_file }}.deb"
+      tags: ['docker','dockerstation']
+
+    - name: Install dockerstation
+      apt:
+        deb: "/home/{{ ansible_env.USER }}/Downloads/{{ docker_file }}.deb"
+        state: present
+      tags: ['docker','dockerstation']
+      sudo: true
