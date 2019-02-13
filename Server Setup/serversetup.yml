@@ -1,70 +1,69 @@
 ---
 - hosts: localhost
   vars:
-    username: {{ ansible_user_id }}
+    username: "{{ ansible_user_id }}"
   become: true
   tasks:
-    - name: Cloning LXDUI.
-      git:
-        repo: https://github.com/AdaptiveScale/lxdui.git
-        version: master
-        dest: /opt/
-        accept_hostkey: yes
 
     - name: update and upgrade system
       apt:
         update_cache: yes
         upgrade: yes
-      tags:
-        - apt
+      tags: ['apt']
+
     - name: install nginx
       apt:
         name: nginx
-      tags:
-        - nginx
+      tags: ['nginx']
 
     - name: install openssh-server
       apt:
         name: openssh-server
         state: present
-      tags:
-        - openssh
+      tags: ['openssh']
+
+    - name: install lynis
+      apt:
+        name: lynis
+        state: present
+      tags: ['lynis','never']
+
+    - name: install openvas
+      apt:
+        name: openvas
+        state: present
+      tags: ['openvas','never']
 
     - name: install openvpn
       apt:
         name: openvpn
         state: present
       tags:
-        - openvpn
+      - openvpn
 
     - name: install python-pip
       apt:
         name: ['python-pip', 'python3-pip']
         state: present
-      tags:
-        - pip
+      tags: ['pip']
 
     - name: install cockpit
       apt:
         name: cockpit
         state: present
-      tags:
-        - cockpit
+      tags: ['cockpit']
 
-    - name: install nginx
+    - name: Install lxd and lxc-utils
       apt:
-        name: nginx
+        name: ['lxd','lxc-utils','lxd-tools']
         state: present
-      ta Cloning LXDUI.gate repository into /opt.
-          git:
-        repgit
+      when: ansible_os_family == 'Debian'
+      tags: ['lxd','lxc','never']
+
+    - name: Cloning LXDUI.
+      git:
+        repo: https://github.com/AdaptiveScale/lxdui.git
         version: master
-        dest: /opt/private-repo
-    accept_hostkey: yes
-
-    - name: install lxd
-      apt:
-        name: openssh-server
-        state: present
-      tags:
-        - openssh
+        dest: /opt/
+      accept_hostkey: yes
+      tags: ['never','lxdui']

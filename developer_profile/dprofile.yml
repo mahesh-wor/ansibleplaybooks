@@ -1,14 +1,14 @@
 ---
 - hosts: localhost
   vars:
-    username: {{ ansible_user_id }}
+    username: "{{ ansible_user_id }}"
   become: true
   tasks:
     - name: Update and Upgrade system
       apt:
         upgrade: yes
         update_cache: yes
-      tags: ['apt','odoo10','odoo11','odoo12']
+      tags: ['apt','odoo11','odoo12']
 
     - name: Install lxd and lxc-utils
       apt:
@@ -38,12 +38,26 @@
       when: ansible_os_family == 'Debian'
       tags: ['docker','odoo10','odoo11','odoo12']
 
+    - name: Create Docker user network
+      command: docker network create --subnet=172.18.0.0/16 mynet
+      tags: ['docker','odoo10','odoo11','odoo12','postgres','jenkins','netdata']
 
     - name: Postgre Environment For Docker
       copy:
         src: postgres_env.tpl
         dest: "/tmp/"
       tags: ['postgres','odoo10','odoo11','odoo12']
+
+    - name: creating /etc/hosts
+      copy:
+        src: hosts
+        dest: "/tmp/"
+      tags: ['postgres','odoo10','odoo11','odoo12']
+
+    - name: appending  /etc/hosts
+      command: echo /tmp/hosts >> /etc/hosts
+      tags: ['dns','odoo10','odoo11','odoo12','postgres']
+
 
     - name: Create Postgres:10 Container
       docker_container:
@@ -65,7 +79,7 @@
         path: /home/{{ ansible_user_id }}/odoo12-addons
         state: directory
 
-      tags: ['uniq','odoo','odoo10','odoo11','odoo12']
+      tags: ['odoo','odoo10','odoo11','odoo12']
 
     - name: Create Odoo10 Container
       docker_container:
@@ -78,15 +92,12 @@
           - db10:db
         ports:
           - 8080:8069
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.2"
         volumes:
           - /home/{{ ansible_user_id }}/odoo10-addons:/mnt/extra-addons   ###add absolute path
       tags: ['odoo10']
-
-    - name: install openssh-server
-      apt:
-        name: openssh-server
-        state: present
-      tags: ['openssh']
 
     - name: Create Odoo11 Container
       docker_container:
@@ -97,11 +108,14 @@
         privileged: true
         links:
           - db10:db
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.3"
         volumes:
           - /home/{{ ansible_user_id }}/odoo11-addons:/mnt/extra-addons ##add absolute path
         ports:
           - 8081:8069
-      tags: ['odoo11']
+      tags: ['odoo11','uniq']
 
     - name: Create Odoo12 Container
       docker_container:
@@ -114,9 +128,14 @@
           - db10:db
         ports:
           - 8082:8069
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.4"
         volumes:
           - /home/odoo10-addons:/mnt/extra-addons   ###add absolute path
       tags: ['odoo12']
+
+
 
     - name: Create Pgadmin4 Container
       docker_container:
@@ -128,6 +147,9 @@
         privileged: true
         ports:
           - 8090:80
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.5"
       tags: ['pgadmin']
 
     - name: Netdata Container
@@ -139,11 +161,20 @@
         privileged: true
         ports:
           - 19999:19999
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.6"
         volumes:
           - /proc:/host/proc:ro
           - /sys:/host/sys:ro
           - /var/run/docker.sock:/var/run/docker.sock:ro
       tags: ['netdata']
+
+    - name: install openssh-server
+      apt:
+        name: openssh-server
+        state: present
+      tags: ['openssh']
 
     - name: Install atom-text
       command: snap install atom --classic
@@ -175,7 +206,7 @@
 
     - name: Create Jenkins HOME dir
       file:
-        path: /home/$USER/jenkins_home
+        path: /home/{{ username }}/jenkins_home
         state: directory
       tags: ['jenkins']
 
@@ -189,6 +220,9 @@
         ports:
           - 8060:8080
           - 50000:50000
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.7"
         volumes:
           - jenkins_home:/var/jenkins_home
       tags: ['jenkins']
