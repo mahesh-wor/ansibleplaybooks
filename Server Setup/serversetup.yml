@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   vars:
-    username: $USER
+    username: {{ ansible_user_id }}
   become: true
   tasks:
     - name: Cloning LXDUI.
