@@ -9,7 +9,7 @@
     - name: Update your system
       apt:
         update_cache: yes
-      tags: ['apt','odoo11','odoo12','always']
+      tags: ['always']
 
     - name: Upgrade your system
       apt:

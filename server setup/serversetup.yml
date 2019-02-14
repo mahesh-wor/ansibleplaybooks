@@ -62,10 +62,14 @@
 
     - name: Install lxd and lxc-utils
       apt:
-        name: ['lxd','lxc-utils','lxd-tools']
+        name: ['lxc-utils','lxc']
         state: present
       when: ansible_os_family == 'Debian'
-      tags: ['lxd','lxc','never']
+      tags: ['lxc','never']
+
+    - name: Install lxd from snap
+      command: snap install lxd --classic
+      tags: ['lxd','never']
 
     - name: Cloning LXDUI.
       git:

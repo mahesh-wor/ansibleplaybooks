@@ -1,0 +1,33 @@
+config:
+  images.auto_update_interval: "0"
+networks:
+- config:
+    ipv4.address: 10.41.160.1/24
+    ipv4.nat: "true"
+    ipv6.address: none
+  description: ""
+  managed: true
+  name: lxdbr0
+  type: bridge
+storage_pools:
+- config:
+    size: 5GB
+    source: /var/snap/lxd/common/lxd/disks/default.img
+    zfs.pool_name: default
+  description: ""
+  name: default
+  driver: zfs
+profiles:
+- config: {}
+  description: Default LXD profile
+  devices:
+    eth0:
+      name: eth0
+      nictype: bridged
+      parent: lxdbr0
+      type: nic
+    root:
+      path: /
+      pool: default
+      type: disk
+  name: default
