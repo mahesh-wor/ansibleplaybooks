@@ -23,16 +23,19 @@
         update_cache: yes
       tags: ['never','apt','odoo11','odoo12','odoo10','dist']
 
-    - name: Install lxd and lxc-utils
-      apt:
-        name: ['lxd','lxc-utils','lxd-tools']
-        state: present
-      when: ansible_os_family == 'Debian'
-      tags: ['lxd','lxc','never']
+    - name: Install lxd from snap
+      command: snap install lxd --classic
+      tags: ['lxd','never']
 
-    - name: Install lxd and lxc-utils
-      command: lxd init --auto
-      tags: ['never','lxd-auto']
+    - name: Copying lxd init dump file
+      copy:
+        src: lxdinit
+        dest: /tmp/lxdinit
+      tags: ['lxd','never']
+
+    - name: Lxd init using lxdinit file
+      command: cat /tmp/lxdinit | lxd init --preseed
+      tags: ['lxd','never']
 
     - name: Install Git
       apt:
@@ -266,3 +269,17 @@
         deb: "/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
         state: present
       tags: ['docker','dockerstation']
+
+    - name: Cloning LXDUI.
+      command: git clone https://github.com/AdaptiveScale/lxdui /opt/lxdui
+      tags: ['lxdui','never']
+
+    - name: Install lxdui dependencies
+      apt:
+        name: ['python3','python3-pip']
+        state: present
+      tags: ['lxdui']
+
+    - name: install lxdui
+      command: python3 /opt/lxdui/setup.py install
+      tags: ['lxdui','never']

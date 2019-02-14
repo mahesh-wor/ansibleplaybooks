@@ -71,13 +71,47 @@
       command: snap install lxd --classic
       tags: ['lxd','never']
 
+    - name: Copying lxd init dump file
+      copy:
+        src: lxdinit
+        dest: /tmp/lxdinit
+      tags: ['lxd','never']
+
+    - name: Lxd init using lxdinit file
+      command: cat /tmp/lxdinit | lxd init --preseed
+      tags: ['lxd','never']
+
+    - name: Create a ubuntu container
+      lxc_container:
+        name: ubuntu18
+        container_log: true
+        template: ubuntu
+        state: started
+        template_options: --release bionic
+      tags: ['lxd','never']
+
+    - name: Create a centos container
+      lxc_container:
+        name: centos
+        container_log: true
+        template: centos
+        state: started
+        template_options: --release 7
+      tags: ['lxd','never','uniq']
+
     - name: Cloning LXDUI.
-      git:
-        repo: https://github.com/AdaptiveScale/lxdui.git
-        version: master
-        dest: /opt/
-      accept_hostkey: yes
-      tags: ['never','lxdui']
+      command: git clone https://github.com/AdaptiveScale/lxdui /opt/lxdui
+      tags: ['lxdui','never']
+
+    - name: Install lxdui dependencies
+      apt:
+        name: ['python3','python3-pip']
+        state: present
+      tags: ['lxdui']
+
+    - name: install lxdui
+      command: python3 /opt/lxdui/setup.py install
+      tags: ['lxdui','never']
 
     - name: Download dockerstation
       get_url: url="{{ dockerstation }}"
@@ -88,5 +122,5 @@
       apt: deb="/home/{{ username }}/Downloads/{{ dockerstation }}.deb"
         state=present
         tags: ['docker','dockerstation']
-      sudo: true
+
 - import_playbook: openscap.yml
