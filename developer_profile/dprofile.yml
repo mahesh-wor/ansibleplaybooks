@@ -258,7 +258,7 @@
 
     - name: Download dockerstation
       get_url: url="{{ dockerstation_link }}"
-        dest="/home/{{ ansible_env.USER }}/Downloads/{{ docker_file }}.deb"
+        dest="/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
       tags: ['docker','dockerstation']
 
     - name: Install dockerstation
