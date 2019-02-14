@@ -2,7 +2,7 @@
 - hosts: localhost
   vars:
     dockerstation: "https://github.com/DockStation/dockstation/releases/download/v1.4.1/dockstation_1.4.1_amd64.deb"
-    username: "{{ ansible_user_id }}"
+    username: "{{ ansible_user }}"
   become: true
   tasks:
 
@@ -77,11 +77,11 @@
 
     - name: Download dockerstation
       get_url: url="{{ dockerstation }}"
-        dest="/home/{{ ansible_env.USER }}/Downloads/{{ dockerstation }}.deb"
+        dest="/home/{{ username }}/Downloads/{{ dockerstation }}.deb"
       tags: ['docker','dockerstation']
 
     - name: Install dockerstation
-      apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ dockerstation }}.deb"
+      apt: deb="/home/{{ username }}/Downloads/{{ dockerstation }}.deb"
         state=present
         tags: ['docker','dockerstation']
       sudo: true

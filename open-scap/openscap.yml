@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   vars:
-    username: "{{ ansible_user_id }}"
+    username: "{{ ansible_user }}"
   become: true
   tasks:
     - name: Ensure permission 0644 on /etc/group

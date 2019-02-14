@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    username: ubuntu
+    username: "{{ ansible_user }}"
   become: true
   tasks:
     - name: make direcotry

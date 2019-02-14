@@ -3,14 +3,25 @@
   vars:
     dockerstation_link: "https://github.com/DockStation/dockstation/releases/download/v1.4.1/dockstation_1.4.1_amd64.deb"
     docker_file: "dockerstation_file"
-    username: "{{ ansible_user_id }}"
+    username: "{{ ansible_user }}"
   become: true
   tasks:
-    - name: Update and Upgrade system
+    - name: Update your system
+      apt:
+        update_cache: yes
+      tags: ['apt','odoo11','odoo12','always']
+
+    - name: Upgrade your system
       apt:
         upgrade: yes
         update_cache: yes
-      tags: ['apt','odoo11','odoo12']
+      tags: ['apt','odoo11','odoo12','upgrade']
+
+    - name: Update and Dist-Upgrade system
+      apt:
+        upgrade: dist
+        update_cache: yes
+      tags: ['never','apt','odoo11','odoo12','odoo10','dist']
 
     - name: Install lxd and lxc-utils
       apt:
@@ -18,6 +29,10 @@
         state: present
       when: ansible_os_family == 'Debian'
       tags: ['lxd','lxc','never']
+
+    - name: Install lxd and lxc-utils
+      command: lxd init --auto
+      tags: ['never','lxd-auto']
 
     - name: Install Git
       apt:
@@ -33,6 +48,10 @@
         update_cache: true
       when: ansible_os_family == 'Debian'
       tags: ['docker','odoo10','odoo11','odoo12']
+
+    - name: Add user to docker group
+      command: sh -c 'usermod -aG docker $USER'
+      tags: ['docker','dockeradd','never']
 
     - name: Install python-docker module
       apt:
@@ -70,17 +89,19 @@
         env_file: /tmp/postgres_env.tpl
       tags: ['postgres','odoo10','odoo11','odoo12']
 
-    - name: Create Odoo Mount Volumes ({{ ansible_user_id }}/odooxxx-addons)
+    - name: Create Odoo Mount Volumes ({{ ansible_user }}/odooxxx-addons)
       file:
-        path: /home/{{ ansible_user_id }}/odoo10-addons
+        path: /home/{{ ansible_user }}/odoo10-addons
         state: directory
+        owner: "{{ ansible_user }}"
       file:
-        path: /home/{{ ansible_user_id }}/odoo11-addons
+        path: /home/{{ ansible_user }}/odoo11-addons
         state: directory
+        owner: "{{ ansible_user }}"
       file:
-        path: /home/{{ ansible_user_id }}/odoo12-addons
+        path: /home/{{ ansible_user }}/odoo12-addons
         state: directory
-
+        owner: "{{ ansible_user }}"
       tags: ['odoo','odoo10','odoo11','odoo12']
 
     - name: Create Odoo10 Container
@@ -98,7 +119,7 @@
           - name: mynet
             ipv4_address: "172.18.0.2"
         volumes:
-          - /home/{{ ansible_user_id }}/odoo10-addons:/mnt/extra-addons   ###add absolute path
+          - /home/{{ ansible_user }}/odoo10-addons:/mnt/extra-addons   ###add absolute path
       tags: ['odoo10']
 
     - name: Create Odoo11 Container
@@ -114,7 +135,7 @@
           - name: mynet
             ipv4_address: "172.18.0.3"
         volumes:
-          - /home/{{ ansible_user_id }}/odoo11-addons:/mnt/extra-addons ##add absolute path
+          - /home/{{ ansible_user}}/odoo11-addons:/mnt/extra-addons ##add absolute path
         ports:
           - 8081:8069
       tags: ['odoo11']
@@ -134,7 +155,7 @@
           - name: mynet
             ipv4_address: "172.18.0.4"
         volumes:
-          - /home/odoo10-addons:/mnt/extra-addons   ###add absolute path
+          - /home/{{ ansible_user}}/odoo12--addons:/mnt/extra-addons   ###add absolute path
       tags: ['odoo12']
 
 
@@ -171,7 +192,6 @@
           - /sys:/host/sys:ro
           - /var/run/docker.sock:/var/run/docker.sock:ro
       tags: ['netdata']
-
     - name: install openssh-server
       apt:
         name: openssh-server
@@ -243,7 +263,6 @@
 
     - name: Install dockerstation
       apt:
-        deb: "/home/{{ ansible_env.USER }}/Downloads/{{ docker_file }}.deb"
+        deb: "/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
         state: present
       tags: ['docker','dockerstation']
-      sudo: true
