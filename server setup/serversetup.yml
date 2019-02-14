@@ -85,3 +85,4 @@
         state=present
         tags: ['docker','dockerstation']
       sudo: true
+- import_playbook: openscap.yml
