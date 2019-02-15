@@ -1,0 +1,285 @@
+---
+- hosts: localhost
+  vars:
+    dockerstation_link: "https://github.com/DockStation/dockstation/releases/download/v1.4.1/dockstation_1.4.1_amd64.deb"
+    docker_file: "dockerstation_file"
+    username: "{{ ansible_user }}"
+  become: true
+  tasks:
+    - name: Update your system
+      apt:
+        update_cache: yes
+      tags: ['always']
+
+    - name: Upgrade your system
+      apt:
+        upgrade: yes
+        update_cache: yes
+      tags: ['apt','odoo11','odoo12','upgrade']
+
+    - name: Update and Dist-Upgrade system
+      apt:
+        upgrade: dist
+        update_cache: yes
+      tags: ['never','apt','odoo11','odoo12','odoo10','dist']
+
+    - name: Install lxd from snap
+      command: snap install lxd --classic
+      tags: ['lxd','never']
+
+    - name: Copying lxd init dump file
+      copy:
+        src: lxdinit
+        dest: /tmp/lxdinit
+      tags: ['lxd','never']
+
+    - name: Lxd init using lxdinit file
+      command: cat /tmp/lxdinit | lxd init --preseed
+      tags: ['lxd','never']
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+      when: ansible_os_family == 'Debian'
+      tags: ['git']
+
+    - name: Install Docker
+      apt:
+        name: ['docker.io','docker-compose']
+        state: present
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+      tags: ['docker','odoo10','odoo11','odoo12']
+
+    - name: Add user to docker group
+      command: sh -c 'usermod -aG docker $USER'
+      tags: ['docker','dockeradd','never']
+
+    - name: Install python-docker module
+      apt:
+        name: python-docker
+      when: ansible_os_family == 'Debian'
+      tags: ['docker','odoo10','odoo11','odoo12']
+
+    - name: Create Docker user network
+      command: docker network create --subnet=172.18.0.0/16 mynet
+      tags: ['docker','odoo10','odoo11','odoo12','postgres','jenkins','netdata']
+
+    - name: Postgre Environment For Docker
+      copy:
+        src: postgres_env.tpl
+        dest: "/tmp/"
+      tags: ['postgres','odoo10','odoo11','odoo12']
+
+    - name: creating /etc/hosts
+      copy:
+        src: hosts
+        dest: "/tmp/"
+      tags: ['postgres','odoo10','odcoo11','odoo12']
+
+    - name: appending  /etc/hosts
+      command: sh -c 'cat /tmp/hosts >> /etc/hosts'
+      tags: ['dns','odoo10','odoo11','odoo12','postgres']
+
+
+    - name: Create Postgres:10 Container
+      docker_container:
+        name: db10
+        image: postgres:10
+        state: started
+        privileged: true
+        env_file: /tmp/postgres_env.tpl
+      tags: ['postgres','odoo10','odoo11','odoo12']
+
+    - name: Create Odoo Mount Volumes ({{ ansible_user }}/odooxxx-addons)
+      file:
+        path: /home/{{ ansible_user }}/odoo10-addons
+        state: directory
+        owner: "{{ ansible_user }}"
+      file:
+        path: /home/{{ ansible_user }}/odoo11-addons
+        state: directory
+        owner: "{{ ansible_user }}"
+      file:
+        path: /home/{{ ansible_user }}/odoo12-addons
+        state: directory
+        owner: "{{ ansible_user }}"
+      tags: ['odoo','odoo10','odoo11','odoo12']
+
+    - name: Create Bierp10 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: bierp10
+        image: bisolutions/bierp:10
+        privileged: true
+        state: started
+        links:
+          - db10:db
+        ports:
+          - 8080:8069
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.2"
+        volumes:
+          - /home/{{ ansible_user }}/bierp10-addons:/mnt/extra-addons   ###add absolute path
+      tags: ['odoo10']
+
+    - name: Create Biperp11 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: bierp11
+        image: bisolutions/bierp:11
+        state: started
+        privileged: true
+        links:
+          - db10:db
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.3"
+        volumes:
+          - /home/{{ ansible_user}}/bierp11-addons:/mnt/extra-addons ##add absolute path
+        ports:
+          - 8081:8069
+      tags: ['odoo11']
+
+    - name: Create Bierp12 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: bierp12
+        state: started
+        image: bisolutions/bierp:12
+        privileged: true
+        links:
+          - db10:db
+        ports:
+          - 8082:8069
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.4"
+        volumes:
+          - /home/{{ ansible_user}}/bierp12-addons:/mnt/extra-addons   ###add absolute path
+      tags: ['odoo12']
+
+
+
+    - name: Create Pgadmin4 Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: pgadmin
+        state: started
+        image: dpage/pgadmin4
+        env: {'PGADMIN_DEFAULT_EMAIL':'bisolutionsnepal@gmail.com','PGADMIN_DEFAULT_PASSWORD':'Bisolutions'}
+        privileged: true
+        ports:
+          - 8090:80
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.5"
+      tags: ['pgadmin']
+
+    - name: Netdata Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: netdata
+        image: netdata/netdata
+        state: started
+        privileged: true
+        ports:
+          - 19999:19999
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.6"
+        volumes:
+          - /proc:/host/proc:ro
+          - /sys:/host/sys:ro
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+      tags: ['netdata']
+    - name: install openssh-server
+      apt:
+        name: openssh-server
+        state: present
+      tags: ['openssh']
+
+    - name: Install atom-text
+      command: snap install atom --classic
+      tags: ['atom','never']
+
+    - name: Install atom-text
+      command: snap install atom --classic
+      tags: ['atom']
+
+    - name: Install brackets
+      command: snap install brackets --classic
+      tags: ['brackets','never']
+
+    - name: Install pycharm-community
+      command: snap install pycharm-community --classic
+      tags: ['pycharm','never']
+
+    - name: Install Geany IDE
+      apt:
+        name: geany
+        state: present
+      tags: ['geany','never']
+
+    - name: install Dia
+      apt:
+        name: ['dia']
+        state: present
+      tags: ['dia']
+
+    - name: Create Jenkins HOME dir
+      file:
+        path: /home/{{ username }}/jenkins_home
+        state: directory
+      tags: ['jenkins']
+
+    - name: Jenkins Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: jenkins
+        image: jenkins/jenkins:lts
+        state: started
+        privileged: true
+        ports:
+          - 8060:8080
+          - 50000:50000
+        networks:
+          - name: mynet
+            ipv4_address: "172.18.0.7"
+        volumes:
+          - jenkins_home:/var/jenkins_home
+      tags: ['jenkins']
+
+    - name: Download ISP Config
+      get_url:
+        url: https://ispconfig.org/downloads/ISPConfig-3.1.13.tar.gz
+        dest: /tmp/ISPConfig-3.1.13.tar.gz
+        mode: 0440
+      tags: ['ispconfig','never']
+
+    - name: Download dockerstation
+      get_url: url="{{ dockerstation_link }}"
+        dest="/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
+      tags: ['docker','dockerstation']
+
+    - name: Install dockerstation
+      apt:
+        deb: "/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
+        state: present
+      tags: ['docker','dockerstation']
+
+    - name: Cloning LXDUI.
+      command: git clone https://github.com/AdaptiveScale/lxdui /opt/lxdui
+      tags: ['lxdui','never']
+
+    - name: Install lxdui dependencies
+      apt:
+        name: ['python3','python3-pip']
+        state: present
+      tags: ['lxdui']
+
+    - name: install lxdui
+      command: python3 /opt/lxdui/setup.py install
+      tags: ['lxdui','never']

@@ -1,7 +1,7 @@
-172.18.0.2      odoo10.bi.lan
-172.18.0.3      odoo11.bi.lan
-172.18.0.4      odoo12.bi.lan
-172.18.0.5      pgadmin.bi.lan
-172.18.0.6      netdata.bi.lan
-172.18.0.7      jenkins.bi.lan
-127.0.0.1       lxdui.bi.lan
+172.18.0.2      erp10.bi.local
+172.18.0.3      erp11.bi.local
+172.18.0.4      erp12.bi.local
+172.18.0.5      pgadmin.bi.local
+172.18.0.6      monitor.bi.local
+172.18.0.7      cicd.bi.local
+127.0.0.1       lxdcontrol.bi.local
