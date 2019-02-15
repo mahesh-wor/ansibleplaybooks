@@ -17,6 +17,13 @@
         name: nginx
       tags: ['nginx']
 
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+      when: ansible_os_family == 'Debian'
+      tags: ['git']
+
     - name: install openssh-server
       apt:
         name: openssh-server
@@ -107,20 +114,21 @@
       apt:
         name: ['python3','python3-pip']
         state: present
-      tags: ['lxdui']
+      tags: ['lxdui','never']
 
     - name: install lxdui
       command: python3 /opt/lxdui/setup.py install
       tags: ['lxdui','never']
 
     - name: Download dockerstation
-      get_url: url="{{ dockerstation }}"
-        dest="/home/{{ username }}/Downloads/{{ dockerstation }}.deb"
+      get_url: url="{{ dockerstation_link }}"
+        dest="/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
       tags: ['docker','dockerstation']
 
     - name: Install dockerstation
-      apt: deb="/home/{{ username }}/Downloads/{{ dockerstation }}.deb"
-        state=present
-        tags: ['docker','dockerstation']
+      apt:
+        deb: "/home/{{ ansible_user }}/Downloads/{{ docker_file }}.deb"
+        state: present
+      tags: ['docker','dockerstation']
 
 - import_playbook: openscap.yml

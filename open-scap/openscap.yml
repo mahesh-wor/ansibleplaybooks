@@ -118,3 +118,29 @@
         state="started"
       with_items:
         - rsyslog
+
+    - name: Ensure sudo is installed
+      package:
+        name="{{item}}"
+        state=present
+      with_items:
+        - sudo
+
+    - name: Ensure root ssh login is disabled.
+      command: sed -i 's/PermitRootLogin/#PermitRootLogin/g' /etc/ssh/sshd_config
+
+    - name: Ensure sysctl fs.protected_symlinks is set to 1
+      sysctl:
+        name: fs.protected_symlinks
+        value: 1
+        state: present
+        reload: yes
+
+    - name: Ensure sysctl fs.protected_hardlinks is set to 1
+      sysctl:
+        name: fs.protected_hardlinks
+        value: 1
+        state: present
+        reload: yes
+
+        
