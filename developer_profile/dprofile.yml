@@ -286,4 +286,4 @@
 
     - name: Ping-Pong Test
       ping:
-      tags:['ping','pong','never']
+      tags: ['ping','pong','never']
