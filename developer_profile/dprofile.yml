@@ -283,3 +283,8 @@
     - name: install lxdui
       command: python3 /opt/lxdui/setup.py install
       tags: ['lxdui','never']
+
+    - name: Ping-Pong Test
+      ping:
+      tags:['ping','pong','never'
+
