@@ -1,0 +1,21 @@
+---
+- hosts: virtual
+  name: Docker Container Creator
+  remote_user: invoron
+  become: true
+  tasks:
+    - name: Postgre Environment
+      copy:
+        src: postgres_env.tpl
+        dest: "/tmp/"
+      tags:
+        - dockerenv
+
+    - name: Create Postgres Container
+      docker_container:
+        name: db
+        image: postgres:10
+        privileged: true
+        env_file: /tmp/postgres_env.tpl
+      tags:
+        - postgres

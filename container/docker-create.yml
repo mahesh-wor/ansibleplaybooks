@@ -1,0 +1,28 @@
+---
+- hosts: virtual
+  name: Docker Container Creator
+  remote_user: invoron
+  become: true
+  tasks:
+    - name: include variables for docker
+      include_vars: docker_vars.yml
+
+    - name: Create Postgres Container
+      docker_container:
+        name: "{{ postgre_name }}"
+        image: "{{ postgre_image }}"
+        ports:
+          - "{{ postgre_src_port }}:{{ postgre_dest_port }}"
+        privileged: "{{ postgre_privileged }}"
+      tags:
+        - postgres
+
+    - name: Create Odoo Container
+      docker_container:
+        name: "{{ odoo_name }}"
+        image: "{{ odoo_image }}"
+        ports:
+          - "{{ odoo_src_port }}:{{ odoo_dest_port }}"
+        privileged: "{{ odoo_privileged }}"
+      tags:
+        - docker-odoo

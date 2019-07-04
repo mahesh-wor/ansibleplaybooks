@@ -1,0 +1,19 @@
+---
+- hosts: virtual
+  name: Docker Container Creator
+  remote_user: invoron
+  become: true
+  tasks:
+
+    - name: Create Odoo Container
+      docker_container:
+        # env_file: postgres_env.tpl
+        name: odoo
+        image: odoo:12
+        privileged: true
+        links:
+          - db:db
+        ports:
+          - 8069:8069
+      tags:
+        - dockerodoo 

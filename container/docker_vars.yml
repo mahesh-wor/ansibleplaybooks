@@ -1,0 +1,22 @@
+# Variables For Docker Instance with ansible
+#############################
+# Odoo Docker Variables
+odoo_image: odoo:12
+odoo_name: odoo12
+odoo_src_port: 8086
+odoo_dest_port: 8086
+# odoo_src_vol:
+# odoo_dest_vol:
+odoo_privileged: true
+
+############################################################
+# Postgres Docker Variables
+postgre_image: postgres:12
+postgre_name: db12
+# Use For Mounting Volumes
+# postgre_src_vol:
+# postgre_dest_vol:
+postgre_privileged: true
+postgre_user: odoo
+postgre_password: odoo
+postgre_db: postgres

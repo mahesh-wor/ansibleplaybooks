@@ -1,0 +1,5 @@
+---
+- hosts: virtual
+  become: yes
+  roles:
+    - role: nginxinc.nginx
